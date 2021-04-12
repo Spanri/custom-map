@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>CustomMap Demos</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+		#map {
+			width: 200px;
+			height: 200px;
+			overflow: hidden;
+			border: 1px solid red;
+		}
+
+		.no-select {
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			cursor: move;
+			cursor: -moz-grab;
+			cursor: -webkit-grab;
+		}
+
+		.no-select:active {
+			cursor: move;
+			cursor: -moz-grabbing;
+			cursor: -webkit-grabbing;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="map"></div>
+
+
+	<script type="module">
+		import customMap from "../dist/bundle.esm.js";
+		const { Core, zoomPlugin } = customMap
+
+		const element = document.getElementById("map")
+		const box = new Core(element, {
+			zoom: 0,
+			minZoom: 0,
+			maxZoom: 1,
+			tileUrl: (z, y, x) => `http://localhost:10001/demos/tiles/${z}/${y}/${x}.png`,
+			plugins: [zoomPlugin]
+		})
+
+		box.load()
+	</script>
+</body>
+
+</html>
