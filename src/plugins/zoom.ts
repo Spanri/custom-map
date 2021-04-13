@@ -1,12 +1,12 @@
 function handleZoom(self: any) {
-	const pluginElement = self.el.getElementsByClassName("cm-plugin")[0]
+	const pluginElement = self._el.getElementsByClassName("cm-plugin")[0]
 	const zoomInElement = pluginElement.getElementsByClassName("cm-zoom-in")[0]
 	const zoomOutElement = pluginElement.getElementsByClassName("cm-zoom-out")[0]
 
-	if (self.zoom <= self.minZoom) {
+	if (self._zoom <= self._minZoom) {
 		zoomInElement.removeAttribute("disabled")
 		zoomOutElement.setAttribute("disabled", "")
-	} else if (self.zoom >= self.maxZoom) {
+	} else if (self._zoom >= self._maxZoom) {
 		zoomInElement.setAttribute("disabled", "")
 		zoomOutElement.removeAttribute("disabled")
 	} else {
@@ -25,17 +25,17 @@ export default {
         </div>
       `
 
-			const pluginElement = self.el.getElementsByClassName("cm-plugin")[0]
-			pluginElement.appendChild(zoomElement)
+			const pluginElement = self._el.getElementsByClassName("cm-plugin")[0]
+			pluginElement.insertAdjacentHTML("beforeend", zoomElement)
 
 			const zoomInElement = pluginElement.getElementsByClassName("cm-zoom-in")[0]
 			zoomInElement.addEventListener("click", () => {
-				self.setZoom(self.zoom + 1)
+				self.setZoom(self._zoom + 1)
 			})
 
 			const zoomOutElement = pluginElement.getElementsByClassName("cm-zoom-out")[0]
 			zoomOutElement.addEventListener("click", () => {
-				self.setZoom(self.zoom - 1)
+				self.setZoom(self._zoom - 1)
 			})
 
 			handleZoom(self)

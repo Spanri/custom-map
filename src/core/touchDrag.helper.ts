@@ -19,7 +19,7 @@ function onMouseDown(event: any, el: HTMLElement) {
 	isDragging = true
 }
 
-function onMouseMove(event: any, el: HTMLElement, callback: () => void) {
+function onMouseMove(event: any, el: HTMLElement, callback: (params: any) => void, self: any) {
 	if (!isDragging) return
 
 	if (!event) event = window.event
@@ -29,7 +29,7 @@ function onMouseMove(event: any, el: HTMLElement, callback: () => void) {
 	el.scrollLeft += diffx
 	el.scrollTop += diffy
 
-	callback()
+	callback(self)
 }
 
 function onMouseUp(event: any, el: HTMLElement) {
@@ -47,9 +47,9 @@ function addEvent(name: string, el: any, func: (event: any) => void) {
 	}
 }
 
-export function handleDrag(el: HTMLElement, callback: () => void) {
+export function handleDrag(el: HTMLElement, callback: (params: any) => void, self: any) {
 	addEvent("mousedown", el, (event: any) => onMouseDown(event, el))
-	addEvent("mousemove", el, (event: any) => onMouseMove(event, el, callback))
+	addEvent("mousemove", el, (event: any) => onMouseMove(event, el, callback, self))
 	addEvent("mouseup", el, (event: any) => onMouseUp(event, el))
 	addEvent("mouseup", window, (event: any) => onMouseUp(event, el))
 }

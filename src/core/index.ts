@@ -30,19 +30,23 @@ export default class Core {
 		canvas.width = 400
 		canvas.height = 400
 		canvas.classList.add("cm-canvas")
-		this._el.appendChild(canvas)
+
+		const canvasWrapperElement = document.createElement("div")
+		canvasWrapperElement.classList.add("cm-canvas-wrapper")
+		canvasWrapperElement.appendChild(canvas)
+
+		this._el.appendChild(canvasWrapperElement)
 		this._ctx = canvas.getContext("2d")
 
 		const pluginElement = document.createElement("div")
 		pluginElement.classList.add("cm-plugin")
 		this._el.appendChild(pluginElement)
-
 		this.setPlugins(plugins)
 
-		handleDrag(this._el, this.drawTiles)
+		handleDrag(canvasWrapperElement, this.drawTiles, this)
 
-		if (hooks && hooks.afterInit) {
-			hooks.afterInit(this)
+		if (this._hooks && this._hooks.afterInit) {
+			this._hooks.afterInit(this)
 		}
 	}
 
@@ -51,40 +55,45 @@ export default class Core {
 		this.drawTiles()
 	}
 
-	drawTiles() {
-		this._ctx!.clearRect(0, 0, this._minZoomTileSize * this._xCount, this._minZoomTileSize * this._yCount)
+	drawTiles(self: any = this) {
+		self._ctx!.clearRect(0, 0, self._minZoomTileSize * self._xCount, self._minZoomTileSize * self._yCount)
 
-		if (this._tileUrl) {
-			console.log({ visibleTiles: this.visibleTiles })
-			for (let y = this.visibleTiles.yMin; y <= this.visibleTiles.yMax; y++) {
-				for (let x = this.visibleTiles.xMin; x <= this.visibleTiles.xMax; x++) {
+		console.log({ visibleTiles: self.visibleTiles })
+
+		if (self._tileUrl) {
+			for (let y = self.visibleTiles.yMin; y <= self.visibleTiles.yMax; y++) {
+				for (let x = self.visibleTiles.xMin; x <= self.visibleTiles.xMax; x++) {
 					console.log("x=" + x + " y=" + y)
 					const tileImage = new Image()
 					tileImage.onload = () => {
-						this._ctx!.drawImage(
+						self._ctx!.drawImage(
 							tileImage,
-							this.currentTileSize * x,
-							this.currentTileSize * y,
-							this.currentTileSize - 3,
-							this.currentTileSize - 3
+							self.currentTileSize * x,
+							self.currentTileSize * y,
+							self.currentTileSize - 3,
+							self.currentTileSize - 3
 						)
-						this._ctx!.fill()
+						self._ctx!.fill()
 					}
-					tileImage.src = this._tileUrl!(this._zoom, y, x)
+					tileImage.src = self._tileUrl!(self._zoom, y, x)
 				}
 			}
 		}
 	}
 
 	handleCenter() {
-		this._el.scrollLeft = this._center[0] * this.currentTileSize - this.elRect.width / 2
-		this._el.scrollTop = this._center[1] * this.currentTileSize - this.elRect.width / 2
+		this.elCanvasWrapper.scrollLeft = this._center[0] * this.currentTileSize - this.elRect.width / 2
+		this.elCanvasWrapper.scrollTop = this._center[1] * this.currentTileSize - this.elRect.width / 2
+	}
+
+	get elCanvasWrapper(): HTMLElement {
+		return <HTMLCanvasElement>this._el.getElementsByClassName("cm-canvas-wrapper")[0]
 	}
 
 	get elRect(): DOMRect {
-		const rect = this._el.getBoundingClientRect()
+		const rect = this.elCanvasWrapper.getBoundingClientRect()
 
-		const cs = getComputedStyle(this._el)
+		const cs = getComputedStyle(this.elCanvasWrapper)
 		const paddingX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)
 		const paddingY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)
 		const borderX = parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth)
@@ -92,8 +101,8 @@ export default class Core {
 
 		return {
 			...rect,
-			width: this._el.offsetWidth - paddingX - borderX,
-			height: this._el.offsetHeight - paddingY - borderY
+			width: this.elCanvasWrapper.offsetWidth - paddingX - borderX,
+			height: this.elCanvasWrapper.offsetHeight - paddingY - borderY
 		}
 	}
 
@@ -107,10 +116,10 @@ export default class Core {
 
 	get visibleTiles(): VisibleTiles {
 		return {
-			xMin: Math.floor(this._el.scrollLeft / this.currentTileSize),
-			xMax: Math.floor((this._el.scrollLeft + this.elRect.width - 1) / this.currentTileSize),
-			yMin: Math.floor(this._el.scrollTop / this.currentTileSize),
-			yMax: Math.floor((this._el.scrollTop + this.elRect.height - 1) / this.currentTileSize)
+			xMin: Math.floor(this.elCanvasWrapper.scrollLeft / this.currentTileSize),
+			xMax: Math.min(Math.floor((this.elCanvasWrapper.scrollLeft + this.elRect.width - 1) / this.currentTileSize), this._xCount - 1),
+			yMin: Math.floor(this.elCanvasWrapper.scrollTop / this.currentTileSize),
+			yMax: Math.min(Math.floor((this.elCanvasWrapper.scrollTop + this.elRect.height - 1) / this.currentTileSize), this._yCount - 1)
 		}
 	}
 
@@ -122,11 +131,9 @@ export default class Core {
 		if (plugins && plugins.length) {
 			plugins.forEach(plugin => {
 				Object.entries(plugin).forEach(([key, value]: [string, any]) => {
-					;(this as any)[key] = value
+					;(this as any)["_" + key] = value
 				})
 			})
-
-			console.log(this)
 		}
 	}
 
