@@ -21,6 +21,7 @@
 #### Setup
 
 0. Run npm command
+
    a. View demo, not development
 
    ```bash
