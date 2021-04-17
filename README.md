@@ -1,4 +1,4 @@
-## Кастомная карта (с собственным набором тайлов)
+## Custom map with the ability to put your own set of tiles.
 
 #### Technologies
 
