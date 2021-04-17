@@ -4,6 +4,7 @@ import { babel } from "@rollup/plugin-babel"
 import resolve from "rollup-plugin-node-resolve"
 import commonjs from "rollup-plugin-commonjs"
 import serve from "rollup-plugin-serve"
+import scss from "rollup-plugin-scss"
 
 export default {
 	input: "src/index.ts",
@@ -16,6 +17,7 @@ export default {
 	],
 	plugins: [
 		typescript({ include: "**/*.{ts,js}" }),
+		scss({ output: "dist/styles.css" }),
 		resolve({
 			jsnext: true,
 			main: true,
@@ -25,15 +27,4 @@ export default {
 		babel({ exclude: "node_modules/**", babelHelpers: "bundled" }),
 		serve("./")
 	]
-	// watch: {
-	// 	// chokidar: {
-	// 	//   // if the chokidar option is given, rollup-watch will
-	// 	//   // use it instead of fs.watch. You will need to install
-	// 	//   // chokidar separately.
-	// 	//   //
-	// 	//   // this options object is passed to chokidar. if you
-	// 	//   // don't have any options, just pass `chokidar: true`
-	// 	// },
-	// 	exclude: ["node_modules/**"]
-	// }
 }

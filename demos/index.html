@@ -6,58 +6,15 @@
 	<title>CustomMap Demos</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style>
-		#map {
-			position: relative;
-			width: fit-content;
-		}
-
-		.no-select {
-			-webkit-touch-callout: none;
-			-webkit-user-select: none;
-			-khtml-user-select: none;
-			-moz-user-select: none;
-			-ms-user-select: none;
-			user-select: none;
-			cursor: move;
-			cursor: -moz-grab;
-			cursor: -webkit-grab;
-		}
-
-		.no-select:active {
-			cursor: move;
-			cursor: -moz-grabbing;
-			cursor: -webkit-grabbing;
-		}
-
-		.cm-canvas {}
-
-		.cm-canvas-wrapper {
-			width: 200px;
-			height: 200px;
-			overflow: hidden;
-			border: 1px solid red;
-		}
-
-		.cm-plugin {
-			position: absolute;
-			bottom: 0;
-			right: 0;
-		}
-
-		.cm-zoom {
-			background: white;
-			padding: 5px;
-		}
+		@import "../dist/styles.css";
 	</style>
 </head>
 
 <body>
 	<div id="map"></div>
-	<div>bottom</div>
 
 	<script type="module">
-		import customMap from "../dist/bundle.esm.js";
-		const { Core, zoomPlugin } = customMap
+		import { Core, zoomPlugin } from "../dist/bundle.esm.js";
 
 		const element = document.getElementById("map")
 		const box = new Core(element, {

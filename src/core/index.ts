@@ -26,6 +26,8 @@ export default class Core {
 		this._center = center || [this._xCount / 2, this._yCount / 2]
 		this._hooks = hooks || {}
 
+		el.classList.add("cm")
+
 		const canvas: HTMLCanvasElement = <HTMLCanvasElement>document.createElement("CANVAS")
 		canvas.width = 400
 		canvas.height = 400
@@ -58,12 +60,12 @@ export default class Core {
 	drawTiles(self: any = this) {
 		self._ctx!.clearRect(0, 0, self._minZoomTileSize * self._xCount, self._minZoomTileSize * self._yCount)
 
-		console.log({ visibleTiles: self.visibleTiles })
+		// console.log({ currentTileSize: self.currentTileSize })
 
 		if (self._tileUrl) {
 			for (let y = self.visibleTiles.yMin; y <= self.visibleTiles.yMax; y++) {
 				for (let x = self.visibleTiles.xMin; x <= self.visibleTiles.xMax; x++) {
-					console.log("x=" + x + " y=" + y)
+					// console.log("x=" + x + " y=" + y)
 					const tileImage = new Image()
 					tileImage.onload = () => {
 						self._ctx!.drawImage(
@@ -117,9 +119,9 @@ export default class Core {
 	get visibleTiles(): VisibleTiles {
 		return {
 			xMin: Math.floor(this.elCanvasWrapper.scrollLeft / this.currentTileSize),
-			xMax: Math.min(Math.floor((this.elCanvasWrapper.scrollLeft + this.elRect.width - 1) / this.currentTileSize), this._xCount - 1),
+			xMax: Math.min(Math.floor((this.elCanvasWrapper.scrollLeft + this.elRect.width - 1) / this.currentTileSize), this._xCount),
 			yMin: Math.floor(this.elCanvasWrapper.scrollTop / this.currentTileSize),
-			yMax: Math.min(Math.floor((this.elCanvasWrapper.scrollTop + this.elRect.height - 1) / this.currentTileSize), this._yCount - 1)
+			yMax: Math.min(Math.floor((this.elCanvasWrapper.scrollTop + this.elRect.height - 1) / this.currentTileSize), this._yCount)
 		}
 	}
 
