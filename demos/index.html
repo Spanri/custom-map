@@ -14,7 +14,8 @@
 	<div id="map"></div>
 
 	<script type="module">
-		import { Core, zoomPlugin } from "../dist/bundle.esm.js";
+		import customMap from "../dist/bundle.esm.js";
+		const { Core, zoomPlugin } = customMap
 
 		const element = document.getElementById("map")
 		const box = new Core(element, {

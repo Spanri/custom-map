@@ -20,8 +20,8 @@ export default {
 		afterInit: (self: any) => {
 			const zoomElement: any = `
         <div class="cm-zoom">
-          <button class="cm-zoom-in">-</button>
-          <button class="cm-zoom-out">+</button>
+          <button class="cm-zoom-out">-</button>
+					<button class="cm-zoom-in">+</button>
         </div>
       `
 
@@ -42,7 +42,6 @@ export default {
 		},
 
 		afterZoom: (self: any) => {
-			console.log("after zoom")
 			handleZoom(self)
 		}
 	}

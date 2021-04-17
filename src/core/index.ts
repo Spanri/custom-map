@@ -13,6 +13,7 @@ export default class Core {
 	public _xCount: number
 	public _yCount: number
 	public _hooks: Hooks
+	public _cache: any[][] = [] // [y][x] = tileImage
 
 	constructor(el: HTMLElement, { center, zoom, minZoom, maxZoom, tileUrl, xCount, yCount, minZoomTileSize, hooks, plugins }: InitialData) {
 		this._el = el
@@ -25,6 +26,7 @@ export default class Core {
 		this._yCount = yCount || 2
 		this._center = center || [this._xCount / 2, this._yCount / 2]
 		this._hooks = hooks || {}
+		this._cache = []
 
 		el.classList.add("cm")
 
@@ -54,30 +56,33 @@ export default class Core {
 
 	load() {
 		this.handleCenter()
+		this.initCache()
+		this._ctx!.clearRect(0, 0, this._minZoomTileSize * this._xCount, this._minZoomTileSize * this._yCount)
 		this.drawTiles()
 	}
 
 	drawTiles(self: any = this) {
-		self._ctx!.clearRect(0, 0, self._minZoomTileSize * self._xCount, self._minZoomTileSize * self._yCount)
-
-		// console.log({ currentTileSize: self.currentTileSize })
-
 		if (self._tileUrl) {
 			for (let y = self.visibleTiles.yMin; y <= self.visibleTiles.yMax; y++) {
 				for (let x = self.visibleTiles.xMin; x <= self.visibleTiles.xMax; x++) {
-					// console.log("x=" + x + " y=" + y)
-					const tileImage = new Image()
-					tileImage.onload = () => {
-						self._ctx!.drawImage(
-							tileImage,
-							self.currentTileSize * x,
-							self.currentTileSize * y,
-							self.currentTileSize - 3,
-							self.currentTileSize - 3
-						)
-						self._ctx!.fill()
+					if (!self._cache[y][x]) {
+						const tileImage = new Image()
+						tileImage.onload = () => {
+							setTimeout(() => {
+								self._ctx!.drawImage(
+									tileImage,
+									self.currentTileSize * x,
+									self.currentTileSize * y,
+									self.currentTileSize - 3,
+									self.currentTileSize - 3
+								)
+								self._ctx!.fill()
+							}, 150)
+						}
+						tileImage.src = self._tileUrl!(self._zoom, y, x)
+
+						self._cache[y][x] = true
 					}
-					tileImage.src = self._tileUrl!(self._zoom, y, x)
 				}
 			}
 		}
@@ -86,6 +91,20 @@ export default class Core {
 	handleCenter() {
 		this.elCanvasWrapper.scrollLeft = this._center[0] * this.currentTileSize - this.elRect.width / 2
 		this.elCanvasWrapper.scrollTop = this._center[1] * this.currentTileSize - this.elRect.width / 2
+	}
+
+	/**
+	 * Настраиваем пустой двойной массив, где первый уровень - y, второй - x
+	 */
+	initCache() {
+		const yMax = this.visibleTiles.yMax
+		const yMin = this.visibleTiles.yMin
+		const xMax = this.visibleTiles.xMax
+		const xMin = this.visibleTiles.xMin
+
+		const fillYItem = () => Array.from(Array(this._xCount + 2).map(xItem => false))
+
+		this._cache = Array.from(Array(this._yCount + 2)).map(fillYItem)
 	}
 
 	get elCanvasWrapper(): HTMLElement {
@@ -119,9 +138,9 @@ export default class Core {
 	get visibleTiles(): VisibleTiles {
 		return {
 			xMin: Math.floor(this.elCanvasWrapper.scrollLeft / this.currentTileSize),
-			xMax: Math.min(Math.floor((this.elCanvasWrapper.scrollLeft + this.elRect.width - 1) / this.currentTileSize), this._xCount),
+			xMax: Math.min(Math.floor((this.elCanvasWrapper.scrollLeft + this.elRect.width - 1) / this.currentTileSize), this._xCount + 1),
 			yMin: Math.floor(this.elCanvasWrapper.scrollTop / this.currentTileSize),
-			yMax: Math.min(Math.floor((this.elCanvasWrapper.scrollTop + this.elRect.height - 1) / this.currentTileSize), this._yCount)
+			yMax: Math.min(Math.floor((this.elCanvasWrapper.scrollTop + this.elRect.height - 1) / this.currentTileSize), this._yCount + 1)
 		}
 	}
 
@@ -152,7 +171,9 @@ export default class Core {
 	}
 
 	setZoom(zoom: number) {
+		this._ctx!.clearRect(0, 0, this._minZoomTileSize * this._xCount, this._minZoomTileSize * this._yCount)
 		this._zoom = zoom
+		this.initCache()
 		this.drawTiles()
 
 		if (this._hooks && this._hooks.afterZoom) {
